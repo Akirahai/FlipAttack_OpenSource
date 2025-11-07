@@ -22,12 +22,30 @@ print(f"| {'-' * col_width} | {'-' * col_width} |")
 avg_asr_gpt = 0
 for model in victim_models:
     
-    input_path = "../result/FlipAttack-{}.json".format(model)
+    # input_path = "../result/FlipAttack-{}.json".format(model)
+
+    input_path = "{}/FlipAttack-{}-{}{}{}{}-{}-{}-{}_{}.json".format("final_result",
+                                                            "gpt-oss-120b",
+                                                            "FCS", 
+                                                            "-CoT",
+                                                            "-LangGPT", 
+                                                            "-Few-shot", 
+                                                            model, 
+                                                            "advbench", 
+                                                            0, 
+                                                            519)
         
     with open(input_path, 'rb') as f:
         data = json.load(f)
         
     success = 0
+
+    for idx, result_dict in enumerate(data):
+        if "judge_success_gpt4" not in result_dict:
+            print(f"Missing key at index {idx}. Available keys: {list(result_dict.keys())}")
+            # optionally print the whole entry for inspection:
+            # import pprint; pprint.pprint(result_dict)
+            break
     for idx, result_dict in enumerate(data):
         success += result_dict["judge_success_gpt4"]
     

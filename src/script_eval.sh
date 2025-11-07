@@ -1,0 +1,66 @@
+#!/bin/bash
+set -euo pipefail
+
+# ---------- Configuration ----------
+gpus="0 1 2 4"
+begin=0
+end=20
+batch=4
+
+output_dir="result"
+flip_mode="FCS"
+judge_llm="openai/gpt-oss-120b"
+# judge_llm="openai/gpt-oss-20b"
+max_token=2048
+
+# ---------- Toggle flags (set "true" or "false") ----------
+USE_COT="true"
+USE_FEW_SHOT="true"
+USE_LANG_GPT="true"
+
+# ---------- Models ----------
+models=(
+    # "Qwen/Qwen2.5-7B-Instruct"
+    # "lmsys/vicuna-7b-v1.5"
+    "meta-llama/Llama-3.1-8B-Instruct"
+    "meta-llama/Llama-2-7b-chat-hf"
+)
+
+# ---------- Run ----------
+for model in "${models[@]}"; do
+    echo "======================================="
+    echo "Running model: $model"
+    echo "======================================="
+    echo "Judge Model: $judge_llm"
+    echo "========================================="
+
+    # Build extra flags based on variables
+    extra_flags=""
+
+    if [[ "${USE_COT,,}" == "true" ]]; then
+        extra_flags+=" --cot"
+    fi
+
+    if [[ "${USE_FEW_SHOT,,}" == "true" ]]; then
+        extra_flags+=" --few_shot"
+    fi
+
+    if [[ "${USE_LANG_GPT,,}" == "true" ]]; then
+        extra_flags+=" --lang_gpt"
+    fi
+
+    python main_open_source_eval.py \
+        --eval \
+        --gpus $gpus \
+        --victim_llm "$model" \
+        --begin $begin \
+        --end $end \
+        --batch $batch \
+        --output_dict "$output_dir" \
+        --flip_mode $flip_mode \
+        --judge_llm $judge_llm \
+        --max_token $max_token $extra_flags
+
+    echo "Finished model: $model"
+    echo ""
+done

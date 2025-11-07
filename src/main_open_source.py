@@ -18,10 +18,10 @@ if __name__ == "__main__":
     parser.add_argument('--gpus', type=int, nargs='+', default=[5, 6], help='List of gpus to use')
     parser.add_argument("--victim_llm", type=str, default="Qwen/Qwen2.5-7B-Instruct", help="name of victim LLM") # Our experiments for FlipAttack were conducted in 11/2025.
     parser.add_argument("--temperature", type=float, default=0, help="temperature of victim LLM")
-    parser.add_argument("--max_token", type=int, default=-1, help="max output tokens")
-    parser.add_argument("--retry_time", type=int, default=1000, help="max retry time of failed API calling")
-    parser.add_argument("--failed_sleep_time", type=int, default=1, help="sleep time of failed API calling")
-    parser.add_argument("--round_sleep_time", type=int, default=1, help="sleep time of round")
+    parser.add_argument("--max_token", type=int, default=512, help="max output tokens")
+    # parser.add_argument("--retry_time", type=int, default=1000, help="max retry time of failed API calling")
+    # parser.add_argument("--failed_sleep_time", type=int, default=1, help="sleep time of failed API calling")
+    # parser.add_argument("--round_sleep_time", type=int, default=1, help="sleep time of round")
     parser.add_argument("--batch", type = int, default = 32, help="batch number of parallel process")
 
     # FlipAttack
@@ -70,7 +70,11 @@ if __name__ == "__main__":
     sampling_params = SamplingParams(temperature=args.temperature,top_p=1, max_tokens=args.max_token)
     llm = LLM(model=args.victim_llm, tensor_parallel_size = len(args.gpus))
     # Initialize tokenizer for chat template
-    tokenizer = AutoTokenizer.from_pretrained(args.victim_llm)
+    if "vicuna" in args.victim_llm.lower():
+        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+        print("Using Llama-3.1-8B-Instruct tokenizer chat template for Vicuna model.")
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(args.victim_llm)
 
 
     # victim_llm = LLM(model_id=args.victim_llm,
@@ -110,9 +114,9 @@ if __name__ == "__main__":
                                       victim_llm=args.victim_llm)
 
             log, flip_attack = attack_model.generate(harm_prompt)
-
+            
             formatted_prompt_flip_attack = tokenizer.apply_chat_template(flip_attack, 
-                                                                         tokenizer=False, 
+                                                                         tokenize=False, 
                                                                          add_generation_prompt=True)
 
             # create placeholder result dict (output will be filled after LLM generation)
@@ -138,6 +142,7 @@ if __name__ == "__main__":
         # call the victim LLM once for the batch
         if len(prompts) > 0:
             # vllm will handle multiple prompts in a single call
+
             llm_responses = llm.generate(prompts, sampling_params=sampling_params)
 
             # Map responses back to the corresponding result dicts.
@@ -158,7 +163,7 @@ if __name__ == "__main__":
     os.makedirs(args.output_dict, exist_ok=True)
     victim_llm_name = args.victim_llm.split("/")[-1]
 
-    output_file_name = "{}/FlipAttack-{}{}{}{}-{}-{}-{}_{}.json".format(args.output_dict,
+    output_file_name = "{}/FlipAttack-{}{}{}{}-{}-{}-{}_{}_{}.json".format(args.output_dict,
                                                                         args.flip_mode, 
                                                                         "-CoT" if(args.cot) else "",
                                                                         "-LangGPT" if(args.lang_gpt) else "", 
@@ -166,7 +171,10 @@ if __name__ == "__main__":
                                                                         victim_llm_name, 
                                                                         args.data_name, 
                                                                         args.begin, 
-                                                                        args.end)
+                                                                        args.end,
+                                                                        args.max_token
+                                                                        )
 
     with open(output_file_name, "w", encoding="utf-8") as f:
         json.dump(result_dicts, f, ensure_ascii=False, indent=4)
+    print(f"Saved FlipAttack results to {output_file_name}")
