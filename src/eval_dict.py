@@ -65,27 +65,29 @@ for model in victim_models:
     
     # input_path = "final_result/FlipAttack-{}.json".format(model)
 
-    input_path = "{}/FlipAttack-{}-{}{}{}{}-{}-{}-{}_{}.json".format("final_result",
-                                                            "gpt-oss-120b",
-                                                            "FCS", 
-                                                            "-CoT",
-                                                            "-LangGPT", 
-                                                            "-Few-shot", 
-                                                            model, 
-                                                            "advbench", 
-                                                            0, 
-                                                            519)
-        
+    input_path = f"final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
+
     with open(input_path, 'rb') as f:
         data = json.load(f)
         
     success = 0
+    
+    # for idx, result_dict in enumerate(data):
+    #     response = result_dict["output"]
+    #     if not any([reject in response for reject in reject_dict]):
+    #         success += 1
+    #     # else:
+    #     #     print(f"Rejected by {model}: {response}")
+
     for idx, result_dict in enumerate(data):
-        response = result_dict["output"]
-        if not any([reject in response for reject in reject_dict]):
-            success += 1
-        # else:
-        #     print(f"Rejected by {model}: {response}")
+        if "judge_success_dict" not in result_dict:
+            print(f"Missing key at index {idx}. Available keys: {list(result_dict.keys())}")
+            # optionally print the whole entry for inspection:
+            # import pprint; pprint.pprint(result_dict)
+            break
+
+    for idx, result_dict in enumerate(data):
+        success += result_dict["judge_success_dict"]
     
     asr_gpt = success/len(data)*100
     avg_asr_gpt += asr_gpt

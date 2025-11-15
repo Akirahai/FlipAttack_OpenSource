@@ -24,16 +24,19 @@ for model in victim_models:
     
     # input_path = "../result/FlipAttack-{}.json".format(model)
 
-    input_path = "{}/FlipAttack-{}-{}{}{}{}-{}-{}-{}_{}.json".format("final_result",
-                                                            "gpt-oss-120b",
-                                                            "FCS", 
-                                                            "-CoT",
-                                                            "-LangGPT", 
-                                                            "-Few-shot", 
-                                                            model, 
-                                                            "advbench", 
-                                                            0, 
-                                                            519)
+    input_path = f"final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
+
+
+    # input_path = "{}/FlipAttack-{}-{}{}{}{}-{}-{}-{}_{}.json".format("final_result",
+    #                                                         "gpt-oss-120b",
+    #                                                         "FCS", 
+    #                                                         "-CoT",
+    #                                                         "-LangGPT", 
+    #                                                         "-Few-shot", 
+    #                                                         model, 
+    #                                                         "advbench", 
+    #                                                         0, 
+    #                                                         519)
         
     with open(input_path, 'rb') as f:
         data = json.load(f)
