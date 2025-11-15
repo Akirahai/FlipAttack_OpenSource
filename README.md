@@ -2,14 +2,14 @@
 
 This README documents the small open-source test runner included in this repository. It focuses only on the local/vllm runner files under `src/` and explains how to run `main_open_source.py` and `main_open_source_eval.py` to test open-source victim models.
 
+
+
 ## What this runner does
 
 - Generates adversarial "flip" prompts from a CSV benchmark (`data/harmful_behaviors.csv`).
 - Uses `vllm` to run batched generation on a local victim model (Hugging Face or compatible checkpoint).
 - Saves a JSON checkpoint keyed by dataset id containing: `id`, `goal`, `flip_attack`, `all_prompt` (or `formatted_prompt`), and `output`.
-- Optionally, a separate evaluation script (`main_open_source_eval.py`) can load the checkpoint and run judge-LM evaluation (resumable, batched).
-
-This runner is intended for testing open-source models locally (or on your cluster) without calling cloud APIs.
+- Optionally, a separate evaluation script (`main_open_source_eval.py`) can load the checkpoint and run judge-LM evaluation.
 
 ## Quick environment & installation
 
@@ -25,10 +25,41 @@ pip install -r requirements.txt
 3. Make sure you have the dataset CSV at `data/harmful_behaviors.csv` (or use `--data_name advbench_subset`).
 
 
-## Files
+## Open Source Model Flip Attack Run
 
 - `src/main_open_source.py` — Generate flip attacks and run the victim LLM using `vllm.generate()` in batches. Saves checkpoint JSON keyed by dataset id.
+
+### Quick Run
+
+
+### Files Output Structure
+
+
+
+## Evaluation
 - `src/main_open_source_eval.py` — Loads the checkpoint and runs judge-LM evaluation (resumable; writes checkpoint after each batch). Useful if you want to run expensive judge-LM evaluation separately.
+
+### Quci Run
+
+### Files Output Structure
+
+### Evaluation using GPT OSS 120B Model
+
+
+
+### Evaluation using API model (GPT, Gemini)
+
+
+
+
+### Evaluation using HarmBench Model
+
+
+
+## Files
+
+
+
 
 ## Quick run 
 
