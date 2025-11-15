@@ -62,7 +62,7 @@ class Evaluator():
         output = int(match.group(1)) if match else None
         if output is None:
             print("Error in processing judge output: {}".format(raw_output))
-            output = -1
+            output = None
         return output
     
     def batch_eval(self, batch_harmful_prompts, batch_flip_attacks, batch_responses):

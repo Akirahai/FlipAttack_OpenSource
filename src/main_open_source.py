@@ -3,7 +3,8 @@ import json
 import pandas
 import argparse
 from tqdm import tqdm
-from eval_util import Evaluator
+
+# Import important libraries
 from flip_attack import FlipAttack
 
 
@@ -18,7 +19,7 @@ if __name__ == "__main__":
     parser.add_argument('--gpus', type=int, nargs='+', default=[5, 6], help='List of gpus to use')
     parser.add_argument("--victim_llm", type=str, default="Qwen/Qwen2.5-7B-Instruct", help="name of victim LLM") # Our experiments for FlipAttack were conducted in 11/2025.
     parser.add_argument("--temperature", type=float, default=0, help="temperature of victim LLM")
-    parser.add_argument("--max_token", type=int, default=512, help="max output tokens")
+    parser.add_argument("--max_token", type=int, default=2048, help="max output tokens")
     # parser.add_argument("--retry_time", type=int, default=1000, help="max retry time of failed API calling")
     # parser.add_argument("--failed_sleep_time", type=int, default=1, help="sleep time of failed API calling")
     # parser.add_argument("--round_sleep_time", type=int, default=1, help="sleep time of round")
@@ -40,11 +41,6 @@ if __name__ == "__main__":
     parser.add_argument("--begin", type=int, default=0, help="begin of test data for debug")
     parser.add_argument("--end", type=int, default=519, help="end of test data for debug")
     parser.add_argument("--output_dict", type=str, default="../reproduce_result", help="output path")
-    
-    # evaluation
-    # parser.add_argument("--eval", action="store_true", help="evaluate the attack success rate")
-    parser.add_argument("--judge_llm", type=str, default="gpt-4-0613", help="name of judge LLM")
-    
     args = parser.parse_args()
 
     # GPU Usage
@@ -75,14 +71,6 @@ if __name__ == "__main__":
         print("Using Llama-3.1-8B-Instruct tokenizer chat template for Vicuna model.")
     else:
         tokenizer = AutoTokenizer.from_pretrained(args.victim_llm)
-
-
-    # victim_llm = LLM(model_id=args.victim_llm,
-    #            temperature=args.temperature,
-    #            max_tokens=args.max_token,
-    #            retry_time=args.retry_time,
-    #            failed_sleep_time=args.failed_sleep_time,
-    #            round_sleep_time=args.round_sleep_time)
 
     # load data
     adv_bench = pandas.read_csv(args.data_path)
@@ -139,7 +127,7 @@ if __name__ == "__main__":
             prompts.append(formatted_prompt_flip_attack)
             batch_result_indices.append(idx)
 
-        # call the victim LLM once for the batch
+        # call the victim LLM once for the current batch
         if len(prompts) > 0:
             # vllm will handle multiple prompts in a single call
 

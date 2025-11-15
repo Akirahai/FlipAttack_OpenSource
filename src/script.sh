@@ -9,7 +9,6 @@ batch=4
 
 output_dir="result"
 flip_mode="FCS"
-judge_llm="openai/gpt-oss-120b"
 max_token=4068
 
 # ---------- Toggle flags (set "true" or "false") ----------
@@ -54,7 +53,6 @@ for model in "${models[@]}"; do
         --batch $batch \
         --output_dict "$output_dir" \
         --flip_mode $flip_mode \
-        --judge_llm $judge_llm \
         --max_token $max_token $extra_flags
 
     echo "Finished model: $model"
