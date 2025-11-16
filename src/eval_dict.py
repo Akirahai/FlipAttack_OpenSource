@@ -7,6 +7,8 @@ model_dict = {
     "Llama-2-7b-chat-hf": "Llama-2-7B"
 }
 
+template_input_path = "final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
+
 reject_dict = [
             "I'm sorry",
             "Sorry",
@@ -65,7 +67,7 @@ for model in victim_models:
     
     # input_path = "final_result/FlipAttack-{}.json".format(model)
 
-    input_path = f"final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
+    input_path = template_input_path.format(model=model)
 
     with open(input_path, 'rb') as f:
         data = json.load(f)

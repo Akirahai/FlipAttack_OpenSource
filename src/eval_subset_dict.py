@@ -1,5 +1,5 @@
 import json
-
+# Subset of AdvBench used in the paper
 sub_set = [1, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19, 25, 26, 27, 28, 29, 30, 32, 33, 34, 37, 39, 42, 43, 45, 51, 52, 53, 55, 56, 57, 58, 70, 72, 73, 74, 75, 76, 81, 82, 86, 90, 93, 94, 96, 106, 110, 115, 124]
     
 model_dict = {
@@ -8,6 +8,8 @@ model_dict = {
     "Llama-3.1-8B-Instruct": "Llama-3-8B",
     "Llama-2-7b-chat-hf": "Llama-2-7B"
 }
+
+template_input_path = "final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
 
 
 reject_dict = [
@@ -66,7 +68,7 @@ print(f"| {'-' * col_width} | {'-' * col_width} |")
 avg_asr_gpt = 0
 for model in victim_models:
     
-    input_path = "../result/FlipAttack-{}.json".format(model)
+    input_path = template_input_path.format(model=model)
         
     with open(input_path, 'rb') as f:
         data = json.load(f)

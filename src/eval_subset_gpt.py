@@ -9,6 +9,9 @@ model_dict = {
     "Llama-2-7b-chat-hf": "Llama-2-7B"
 }
 
+template_input_path = "final_result/FlipAttack-gpt-oss-120b-FCS-CoT-LangGPT-Few-shot-{model}-advbench-0_519.json"
+
+
 victim_models = model_dict.keys()
 
 col_width = max(len(model) for model in victim_models)
@@ -24,7 +27,7 @@ print(f"| {'-' * col_width} | {'-' * col_width} |")
 avg_asr_gpt = 0
 for model in victim_models:
     
-    input_path = "../result/FlipAttack-{}.json".format(model)
+    input_path = template_input_path.format(model=model)
         
     with open(input_path, 'rb') as f:
         data = json.load(f)
