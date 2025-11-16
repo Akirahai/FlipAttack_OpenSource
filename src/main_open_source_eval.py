@@ -19,10 +19,10 @@ def extract_name(x, default="none"):
 def process_evaluation_batch(result_dicts, evaluator, checkpoint_file_name, eval_type):
 
     skip_keys = {
-        "gpt_oss": "judge_success_gpt4",
-        "harm_bench": "judge_success_harm_bench", 
-        "api": "judge_success_api",
-        "dict": "judge_success_dict"
+        "judge_llm": "judge_success_gpt4",
+        "judge_harm_bench": "judge_success_harm_bench", 
+        "judge_api": "judge_success_api",
+        "judge_dict": "judge_success_dict"
     }
 
     begin = 0
@@ -72,7 +72,8 @@ def process_evaluation_batch(result_dicts, evaluator, checkpoint_file_name, eval
             json.dump(result_dicts, f, ensure_ascii=False, indent=4)
         print(f"[INFO] Checkpoint saved to {checkpoint_file_name} after batch {batch_idx}/{total_batches}.")
 
-        return result_dicts
+    
+    return result_dicts
 
 
 
@@ -115,19 +116,6 @@ if __name__ == "__main__":
     os.environ["WORLD_SIZE"] = "1"
     print(f"Using GPU: {GPU_list}")
 
-    # data path
-    if args.data_name=='advbench':
-        args.data_path = "../data/harmful_behaviors.csv"
-    elif args.data_name=='advbench_subset':
-        args.data_path = "../data/harmful_behaviors_subset.csv"
-    else:
-        raise NameError("Unknown Benchmark {}, please add the implementation.".format(args.data_name))
-
-    # Victim LLM
-    victim_llm_name = args.victim_llm.split("/")[-1]
-    print(f"Evaluation on Victim LLM: {victim_llm_name}")
-
-
     # Evaluation Judge
     judge_llm_name = extract_name(args.judge_llm, "no_llm")
     judge_api_name = args.judge_api or "no_api"
@@ -142,7 +130,7 @@ if __name__ == "__main__":
 
 
     # If existing checkpoint found, load it
-    if args.checkpoint_file is not None:
+    if args.checkpoint_file:
         checkpoint_file_name = f"{args.checkpoint_dir}/{args.checkpoint_file}"
     else:
         checkpoint_file_name = f"{args.checkpoint_dir}/{args.result_file.replace('.json', '')}_{judge_llm_name}_{judge_api_name}_{judge_harm_name}.json"
@@ -150,6 +138,7 @@ if __name__ == "__main__":
 
     # Load existing checkpoint if available
     if os.path.exists(checkpoint_file_name):
+        print(f"[INFO] Found existing checkpoint file at {checkpoint_file_name}. Loading...")
         with open(checkpoint_file_name, "r", encoding="utf-8") as f:
             result_dicts = json.load(f)
         print(f"[INFO] Loaded existing checkpoint from {checkpoint_file_name} with {len(result_dicts)} entries.")
@@ -172,24 +161,25 @@ if __name__ == "__main__":
     # Process evaluation in batches
 
     result_dicts = process_evaluation_batch(
-        result_dicts, evaluator, checkpoint_file_name, eval_type="dict")
+        result_dicts, evaluator, checkpoint_file_name, eval_type="judge_dict")
     
     print(f"[INFO] Completed dictionary-based evaluation. Proceeding to next evaluation type.")
-    if args.judge_llm is not None:
+
+    if args.judge_llm:
         result_dicts = process_evaluation_batch(
-            result_dicts, evaluator, checkpoint_file_name, eval_type="llm")
+            result_dicts, evaluator, checkpoint_file_name, eval_type="judge_llm")
         print(f"[INFO] Completed LLM-based evaluation. Proceeding to next evaluation type.")
     
 
-    elif args.judge_api is not None:
+    elif args.judge_api:
         result_dicts = process_evaluation_batch(
-            result_dicts, evaluator, checkpoint_file_name, eval_type="api")
+            result_dicts, evaluator, checkpoint_file_name, eval_type="judge_api")
         
         print(f"[INFO] Completed API-based evaluation. Proceeding to next evaluation type.")
 
-    elif args.judge_harm_bench is not None:
+    elif args.judge_harm_bench:
         result_dicts = process_evaluation_batch(
-            result_dicts, evaluator, checkpoint_file_name, eval_type="harm_bench")
+            result_dicts, evaluator, checkpoint_file_name, eval_type="judge_harm_bench")
         print(f"[INFO] Completed Harm Bench evaluation. Proceeding to next evaluation type.")
         
 
