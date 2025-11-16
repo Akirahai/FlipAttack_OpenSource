@@ -168,3 +168,19 @@ python main_open_source_eval.py \
 - Currently included in Evaluator
 #### Evaluation using HarmBench Model
 - Using classifier to evaluate which answer is harmfull, which one is negativ, based on this github model: `https://github.com/centerforaisafety/HarmBench/blob/main/notebooks/run_classifier.ipynb`
+
+
+### Evaluation Paper Report File
+- `src/eval_dict.py` is to evaluate and report the performance of all given models using ASR-DICT.
+- `src/eval_gpt.py` is to evaluate and report the performance of all given models using ASR-GPT.
+- 
+
+
+
+
+## Best Run
+
+Following the paper, the best run is considered to be the best among all the experiments they set up.
+- Experiment 1: Using Vanlia A + Vanila B (CoT), test on all flipping modules
+- Experiment 2: Using Flipping Module 3 (FCS), test on all version of Vanila modules
+For me the best version is FCS + Vanila D.
